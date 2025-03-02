@@ -1,20 +1,28 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-// import { Bar, Line } from "react-chartjs-2";
-// import Chart from "chart.js/auto";
+import { Bar, Line } from "react-chartjs-2";
+import Chart from "chart.js/auto";
+import moment from "moment";
 
 const metricsOptions = [
   { title: "Start Time", value: "start_time" },
   { title: "End Time", value: "end_time" },
   { title: "Duration", value: "duration" },
   { title: "Total Moves", value: "total_moves" },
+  { title: "Score", value: "score" },
 ];
 
 const CustomReport = () => {
-  const [selectedMetrics, setSelectedMetrics] = useState([]);
-  const [reportGenerated, setReportGenerated] = useState(false);
+  const [selectedMetrics, setSelectedMetrics] = useState([
+    "start_time",
+    "end_time",
+    "duration",
+    "total_moves",
+    "score",
+  ]);
   const [reportData, setReportData] = useState([]);
-  const [chartData, setChartData] = useState(null);
+  const [lineChartData, setLineChartData] = useState(null);
+  const [barChartData, setBarChartData] = useState(null);
 
   const handleMetricChange = (metric) => {
     setSelectedMetrics((prev) =>
@@ -24,26 +32,36 @@ const CustomReport = () => {
     );
   };
 
-  //   const updateChartData = (data) => {
-  //     const labels = data?.map((row) => row.start_time);
-  //     const durations = data?.map((row) => row.duration);
-  //     setChartData({
-  //       labels,
-  //       datasets: {
-  //         label: "Duration",
-  //         data: durations,
-  //         // backgroundColor: "rgba(54, 162, 235, 0.6)",
-  //         // borderColor: "rgba(54, 162, 235, 1)",
-  //         // borderWidth: 1,
-  //         // fill: false,
-  //       },
-  //     });
-  //   };
-  //   console.log("chartdata", chartData);
+  const updateChartData = (data) => {
+    const labels = data?.map((row) =>
+      moment(row.start_time).format("DD-MM-YY HH:MM")
+    );
+    const durations = data?.map((row) => row.duration);
+    const score = data?.map((row) => row.score);
+    setLineChartData({
+      labels: labels,
+      datasets: [
+        {
+          label: "Duration",
+          data: durations,
+          borderWidth: 1,
+        },
+      ],
+    });
+
+    setBarChartData({
+      labels,
+      datasets: [
+        {
+          label: "Score",
+          data: score,
+          borderWidth: 1,
+        },
+      ],
+    });
+  };
 
   const generateReport = async () => {
-    if (!reportGenerated) setReportGenerated(true);
-
     try {
       const response = await axios.post(
         `${process.env.REACT_APP_BACKEND_URL}/report/custom`,
@@ -53,9 +71,9 @@ const CustomReport = () => {
       );
       setReportData(response?.data?.sessions);
 
-      //   if (response.data.sessions.length > 0) {
-      //     updateChartData(response.data.sessions);
-      //   }
+      if (response.data.sessions.length > 0) {
+        updateChartData(response.data.sessions);
+      }
     } catch (err) {
       window.alert(err?.response?.data?.error || "Something went wrong!");
     }
@@ -86,13 +104,15 @@ const CustomReport = () => {
   };
 
   useEffect(() => {
-    if (reportGenerated) {
-      generateReport();
-    }
+    generateReport();
   }, [selectedMetrics]);
 
   return (
     <div className="custom-report-container">
+      <a href="/" className="back">
+        🔙 Back
+      </a>
+
       <h2>Custom Reports</h2>
 
       <div className="metrics-selection">
@@ -115,18 +135,27 @@ const CustomReport = () => {
           Download CSV
         </button>
       </div>
-      {/* 
-      {chartData && (
+
+      {reportData?.length && selectedMetrics.includes("start_time") && (
         <div className="charts-container">
           <h3>Graphical Representation</h3>
-          <div className="chart">
-            <Bar data={chartData} />
-          </div>
-          <div className="chart">
-            <Line data={chartData} />
+          <div className="charts">
+            {selectedMetrics.includes("score") && (
+              <div className="chart">
+                <Bar data={barChartData} />
+              </div>
+            )}
+            {selectedMetrics.includes("duration") && (
+              <div className="chart">
+                <Line data={lineChartData} />
+              </div>
+            )}
+            {!selectedMetrics.includes("score") &&
+              !selectedMetrics.includes("duration") &&
+              "Select Duration or Score to view graph"}
           </div>
         </div>
-      )} */}
+      )}
 
       {reportData.length > 0 && (
         <div className="report-table-container">
