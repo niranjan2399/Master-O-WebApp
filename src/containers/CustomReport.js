@@ -106,7 +106,7 @@ const CustomReport = () => {
 
   useEffect(() => {
     generateReport();
-  }, [selectedMetrics]);
+  }, []);
 
   return (
     <div className="custom-report-container">
