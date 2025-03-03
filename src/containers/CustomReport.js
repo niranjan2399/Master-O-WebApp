@@ -137,7 +137,7 @@ const CustomReport = () => {
         </button>
       </div>
 
-      {reportData?.length && selectedMetrics.includes("start_time") && (
+      {!!reportData?.length && selectedMetrics.includes("start_time") && (
         <div className="charts-container">
           <h3>Graphical Representation</h3>
           <div className="charts">
