@@ -36,9 +36,9 @@ const CustomReport = () => {
   const updateChartData = (data) => {
     const labels = data?.map((row) =>
       moment(row.start_time).format("DD-MM-YY HH:MM")
-    );
-    const durations = data?.map((row) => row.duration);
-    const score = data?.map((row) => row.score);
+    ).reverse();
+    const durations = data?.map((row) => row.duration).reverse();
+    const score = data?.map((row) => row.score).reverse();
     setLineChartData({
       labels: labels,
       datasets: [
