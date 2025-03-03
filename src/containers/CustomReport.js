@@ -131,7 +131,7 @@ const CustomReport = () => {
       </div>
 
       <div className="report-buttons">
-        <button onClick={generateReport}>Generate Report</button>
+        {/* <button onClick={generateReport}>Generate Report</button> */}
         <button onClick={downloadCSV} disabled={!selectedMetrics.length}>
           Download CSV
         </button>
